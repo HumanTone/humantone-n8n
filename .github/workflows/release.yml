@@ -1,0 +1,75 @@
+# Release workflow: triggered by pushing a SemVer tag (no `v` prefix, e.g. `0.0.1`).
+#
+# Flow:
+#   1. `npm run release` is run locally by the owner (uses release-it to bump
+#      version in package.json, generate changelog, commit, tag, push). It does
+#      NOT publish to npm — only the CI does, via this workflow.
+#   2. Pushing the tag triggers this workflow.
+#   3. The `verify` job confirms the tag matches `package.json` version.
+#   4. The `publish` job runs `npm run release` again, but this time inside
+#      GitHub Actions. The `@n8n/node-cli` release command auto-detects CI via
+#      the `GITHUB_ACTIONS` env var and runs lint + build + `npm publish`
+#      with provenance.
+#
+# Trusted Publishing setup (npm OIDC):
+#   1. After the first publish, owner goes to
+#      https://www.npmjs.com/package/n8n-nodes-humantone -> Settings ->
+#      Trusted Publishers -> Add:
+#        Provider:    GitHub Actions
+#        Owner:       HumanTone
+#        Repository:  humantone-n8n
+#        Workflow:    release.yml
+#        Environment: (leave empty)
+#   2. After that, this workflow publishes via OIDC; no NPM_TOKEN secret needed.
+#
+# Until Trusted Publishing is configured, set `NPM_TOKEN` as a repository
+# secret and uncomment the `NODE_AUTH_TOKEN` env line below.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  verify-version-matches-tag:
+    name: Verify package.json version matches tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare package.json version to tag
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          PACKAGE=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PACKAGE" ]; then
+            echo "Mismatch: tag=$TAG, package.json=$PACKAGE"
+            exit 1
+          fi
+          echo "OK: tag and package.json both at $TAG"
+
+  publish:
+    name: Build, lint, and publish to npm
+    needs: verify-version-matches-tag
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - run: npm ci
+
+      # `n8n-node release` auto-detects CI (GITHUB_ACTIONS=true) and runs
+      # lint + build + npm publish with provenance.
+      - run: npm run release
+        # Uncomment if Trusted Publishing is not yet configured on npm:
+        # env:
+        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

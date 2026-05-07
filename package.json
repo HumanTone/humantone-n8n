@@ -1,0 +1,61 @@
+{
+	"name": "n8n-nodes-humantone",
+	"version": "0.0.1",
+	"description": "n8n community node for HumanTone. Humanize AI-generated text and check AI likelihood directly in your workflows.",
+	"keywords": [
+		"n8n-community-node-package",
+		"humantone",
+		"ai-humanizer",
+		"ai-detection",
+		"content",
+		"seo",
+		"humanize"
+	],
+	"license": "MIT",
+	"homepage": "https://humantone.io",
+	"author": {
+		"name": "HumanTone",
+		"email": "dev@humantone.io"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/HumanTone/humantone-n8n.git"
+	},
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"build": "n8n-node build",
+		"dev": "n8n-node dev",
+		"lint": "n8n-node lint",
+		"lintfix": "n8n-node lint --fix",
+		"format": "n8n-node format",
+		"release": "n8n-node release",
+		"prepublishOnly": "n8n-node prerelease"
+	},
+	"files": [
+		"dist"
+	],
+	"n8n": {
+		"n8nNodesApiVersion": 1,
+		"strict": false,
+		"credentials": [
+			"dist/credentials/HumanToneApi.credentials.js"
+		],
+		"nodes": [
+			"dist/nodes/HumanTone/HumanTone.node.js"
+		]
+	},
+	"devDependencies": {
+		"@n8n/node-cli": "latest"
+	},
+	"overrides": {
+		"eslint": "^9.0.0"
+	},
+	"dependencies": {
+		"humantone": "^0.0.2"
+	},
+	"peerDependencies": {
+		"n8n-workflow": "*"
+	}
+}

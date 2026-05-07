@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tgz
+*.log
+npm-debug.log*
+.npm
+.eslintcache
+.DS_Store
+.idea/
+.vscode/
+.claude/
+.env
+.env.local
+coverage/
+.nyc_output/
