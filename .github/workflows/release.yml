@@ -65,7 +65,10 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
 
-      - run: npm ci
+      # --ignore-scripts skips native module builds (notably `isolated-vm`,
+      # transitive devDep of @n8n/node-cli). Native builds are not needed for
+      # our `tsc` build, lint, or `npm publish`. See ci.yml for the longer note.
+      - run: npm ci --ignore-scripts
 
       # `n8n-node release` auto-detects CI (GITHUB_ACTIONS=true) and runs
       # lint + build + npm publish with provenance.

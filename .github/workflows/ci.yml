@@ -27,7 +27,13 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
 
-      - run: npm ci
+      # --ignore-scripts skips native module builds (notably `isolated-vm`,
+      # a transitive devDep of @n8n/node-cli via @n8n/ai-node-sdk). Those
+      # native builds are not needed for our `tsc` build or ESLint lint;
+      # they exist for n8n's AI sandbox runtime, which we don't exercise
+      # here. Without --ignore-scripts, `isolated-vm` fails to compile
+      # against newer V8 headers shipped in Node 20.20.2 / 22.x runners.
+      - run: npm ci --ignore-scripts
 
       - run: npm run lint
 
