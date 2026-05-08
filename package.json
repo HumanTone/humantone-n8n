@@ -47,7 +47,7 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "latest"
+		"@n8n/node-cli": "^0.30.1"
 	},
 	"overrides": {
 		"eslint": "^9.0.0"
